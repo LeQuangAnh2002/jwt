@@ -2,26 +2,26 @@ import axios from "axios";
 
 
 
-let refresh = false;
+// let refresh = false;
 
-axios.interceptors.response.use(resp => resp, async error => {
-    if (error.response.status === 403 && !refresh) {
-        refresh = true;
-        const token = localStorage.getItem('refresh_Token');
-        localStorage.removeItem('token')
-        localStorage.removeItem('token')
-        localStorage.removeItem('token')
-        const response = await axios.post(`${UsersService.BASE_URL}/auth/refresh-token`, {token});
-        if (response.status === 200) {
-            const newToken = response.data.token;
-            localStorage.setItem("token", newToken);
-
-            return axios.request(error.config);
-        }
-    }
-    refresh = false;
-    return error;
-});
+// axios.interceptors.response.use(resp => resp, async error => {
+//     if (error.response.status === 403 && !refresh) {
+//         refresh = true;
+//         const token = localStorage.getItem('refresh_Token');
+//         localStorage.removeItem('token')
+//         localStorage.removeItem('token')
+//         localStorage.removeItem('token')
+//         const response = await axios.post(`${UsersService.BASE_URL}/auth/refresh-token`, {token});
+//         if (response.status === 200) {
+//             const newToken = response.data.token;
+//             localStorage.setItem("token", newToken);
+//
+//             return axios.request(error.config);
+//         }
+//     }
+//     refresh = false;
+//     return error;
+// });
 
 class UsersService {
     static BASE_URL = "http://localhost:8080"
@@ -38,14 +38,15 @@ class UsersService {
    }
     static async register(userData,token){
         try {
-            const response = await axios.post(`${UsersService.BASE_URL}/auth/register`,  userData,{
+            const response = await axios.post(`${UsersService.BASE_URL}/admin/register`,  userData,{
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
             return response.data;
         }catch (e) {
-            throw e;
+                throw e;
+
         }
     }
     static async getAllUsers(token){

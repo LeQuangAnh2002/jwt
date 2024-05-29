@@ -31,6 +31,7 @@ public class UserManagementService {
             ourUser.setRole(register.getRole());
             ourUser.setName(register.getName());
             ourUser.setPassword(passwordEncoder.encode(register.getPassword()));
+            ourUser.setImg(register.getImg());
             OurUsers ourUsersResult = usersRepo.save(ourUser);
             if (ourUsersResult.getId() > 0){
                 reqsp.setStatusCode(200);
@@ -152,6 +153,7 @@ public class UserManagementService {
                 existingUser.setName(updatedUser.getName());
                 existingUser.setCity(updatedUser.getCity());
                 existingUser.setRole(updatedUser.getRole());
+                existingUser.setImg(updatedUser.getImg());
 
                 // Check if password is present in the request
                 if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {

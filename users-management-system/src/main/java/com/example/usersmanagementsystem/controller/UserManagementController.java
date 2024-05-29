@@ -6,17 +6,20 @@ import com.example.usersmanagementsystem.dto.RefreshTokenRequest;
 import com.example.usersmanagementsystem.dto.ReqRes;
 import com.example.usersmanagementsystem.entity.OurUsers;
 import com.example.usersmanagementsystem.entity.RefreshToken;
+import com.example.usersmanagementsystem.exception.AccessForbiddenException;
+import com.example.usersmanagementsystem.exception.UnauthorizedAccessException;
 import com.example.usersmanagementsystem.repository.UsersRepo;
 import com.example.usersmanagementsystem.service.JWTUtils;
 import com.example.usersmanagementsystem.service.RefreshTokenService;
 import com.example.usersmanagementsystem.service.UserManagementService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,19 +36,31 @@ public class UserManagementController {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    @PostMapping("/auth/register")
-    public ResponseEntity<ReqRes> register(@RequestBody ReqRes register){
-        return ResponseEntity.ok(userManagementService.register(register));
-    }
+
     @PostMapping("/auth/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody AuthRequest authRequest){
-                 Authentication authentication =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(),authRequest.getPassword()));
-                 if(authentication.isAuthenticated()){
-                     OurUsers user = usersRepo.findByEmail(authRequest.getEmail()).orElseThrow();
-                      RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getEmail());
-                     return ResponseEntity.ok(JwtResponse.builder().token(jwtUtils.generateToken(user)).refreshToken(refreshToken.getToken()).role(user.getRole()).build());
-                 }
-        throw new UsernameNotFoundException("invalid user request !");
+    public ResponseEntity<JwtResponse> login(@RequestBody @Valid AuthRequest authRequest) throws Exception {
+//                try {
+//                    Authentication authentication =  authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(),authRequest.getPassword()));
+//                    if(authentication.isAuthenticated()){
+//                        OurUsers user = usersRepo.findByEmail(authRequest.getEmail()).orElseThrow(() -> new UserNotFoundException("Username không tồn tại trong database"));
+//                        RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getEmail());
+//                        return ResponseEntity.ok(JwtResponse.builder().token(jwtUtils.generateToken(user)).refreshToken(refreshToken.getToken()).role(user.getRole()).build());
+//                    }else {
+//                        throw new UserNotFoundException("Username or password does not exist in the database");
+//                    }
+//                }catch (BadCredentialsException e){
+//                    throw e;
+//                }
+
+        OurUsers user = usersRepo.findByEmail(authRequest.getEmail()).orElseThrow(() -> new UnauthorizedAccessException("Account does not exist"));
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        boolean authenticated = passwordEncoder.matches(authRequest.getPassword(),user.getPassword());
+
+        if (!authenticated){
+            throw new UnauthorizedAccessException("Đăng nhập sai, xin vui lòng thử lại");
+        }
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getEmail());
+        return ResponseEntity.ok(JwtResponse.builder().token(jwtUtils.generateToken(user)).refreshToken(refreshToken.getToken()).role(user.getRole()).build());
     }
     @PostMapping("/auth/refresh-token")
     public ResponseEntity<JwtResponse> refreshToken(@RequestBody RefreshTokenRequest refresh){
@@ -62,6 +77,10 @@ public class UserManagementController {
     public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request){
         refreshTokenService.deleteByToken(request.getToken());
         return ResponseEntity.ok().build();
+    }
+    @PostMapping("/admin/register")
+    public ResponseEntity<ReqRes> register(@RequestBody @Valid ReqRes register){
+        return ResponseEntity.ok(userManagementService.register(register));
     }
 
     @GetMapping("/admin/get-all-users")

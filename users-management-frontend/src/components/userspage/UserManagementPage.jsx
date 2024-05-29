@@ -6,6 +6,7 @@ import LoadingIcon from "../common/Loading";
 
 function UserManagementPage() {
     const [users, setUsers] = useState([]);
+
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         // Fetch users data when the component mounts
@@ -49,6 +50,7 @@ function UserManagementPage() {
                 <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Image</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Actions</th>
@@ -58,6 +60,9 @@ function UserManagementPage() {
                 {users.map(user => (
                     <tr key={user.id}>
                         <td>{user.id}</td>
+                        <td>
+                            <img src={user.img} style={{height: '150px', width: '150px',borderRadius: "50%",objectFit : 'cover'}} />
+                        </td>
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>

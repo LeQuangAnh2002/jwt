@@ -25,6 +25,8 @@ public class OurUsers implements UserDetails {
     private String password;
     private String city;
     private String role;
+    @Column(columnDefinition = "TEXT")
+    private String img;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

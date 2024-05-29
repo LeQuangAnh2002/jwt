@@ -11,7 +11,8 @@ function ProfilePage() {
 
     useEffect(() => {
         fetchProfileInfo();
-        setLoading(false);
+
+        setLoading(false)
     }, []);
 
     const fetchProfileInfo = async () => {
@@ -26,14 +27,24 @@ function ProfilePage() {
         }
     };
 
-    return loading ?(<LoadingIcon/>) : (
+    return (
         <div className="profile-page-container">
-            <h2>Profile Information</h2>
-            <p>Name: {profileInfo.name}</p>
-            <p>Email: {profileInfo.email}</p>
-            <p>City: {profileInfo.city}</p>
-            {profileInfo.role === "ADMIN" && (
-                <button><Link to={`/update-user/${profileInfo.id}`}>Update This Profile</Link></button>
+            {loading ? (
+                <div className="center-loading">
+                <LoadingIcon />
+                </div>
+            ) : (
+                <>
+                    <h2>Profile Information</h2>
+                    <p>Name: {profileInfo.name}</p>
+                    <p>Email: {profileInfo.email}</p>
+                    <p>City: {profileInfo.city}</p>
+                    {profileInfo.role === "ADMIN" && (
+                        <button>
+                            <Link to={`/update-user/${profileInfo.id}`}>Update This Profile</Link>
+                        </button>
+                    )}
+                </>
             )}
         </div>
     );

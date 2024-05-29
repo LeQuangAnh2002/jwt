@@ -296,7 +296,12 @@ button:hover {
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: #f9f9f9;
+  background-color: white;
+
+}
+.profile-page-container .center-loading{
+  display: flex;
+  justify-content: center;
 }
 
 .profile-page-container h2 {
